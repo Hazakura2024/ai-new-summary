@@ -10,7 +10,7 @@ const openai = new OpenAI();
 
 export async function createSummary(formData: FormData) {
     const url = formData.get("url") as string;
-    if (url) {
+    if (!url) {
         throw new Error("URLが入力されていません");
     }
 
@@ -50,7 +50,7 @@ export async function createSummary(formData: FormData) {
             messages: [
                 {
                     role: "system",
-                    content: "あなたは優秀な編集者です。あなたは優秀な編集者です。与えられたWeb記事の本文を、重要度が高い順に必ず3行の箇条書き（改行区切り）で要約してください。余計な挨拶や解説、箇条書きの記号（・や-*など）は一切含めず、純粋なテキストの3行のデータだけを返してください。"
+                    content: "あなたは優秀な編集者です。与えられたWeb記事の本文を、重要度が高い順に必ず3行の箇条書き（改行区切り）で要約してください。余計な挨拶や解説、箇条書きの記号（・や-*など）は一切含めず、純粋なテキストの3行のデータだけを返してください。"
                 },
                 {
                     role: "user",
@@ -61,7 +61,7 @@ export async function createSummary(formData: FormData) {
         });
 
         const summaryContent = completion.choices[0].message.content;
-        if (summaryContent) {
+        if (!summaryContent) {
             throw new Error("AIによる要約の生成に失敗しました🤣")
         }
 
