@@ -43,8 +43,23 @@ export async function createSummary(formData: FormData) {
         const articleTitle = article.title || "無題の記事";
         const articleText = article.textContent.trim().substring(0,4000);// 安全のため上限指定
 
+        
+        const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: "あなたは優秀な編集者です。あなたは優秀な編集者です。与えられたWeb記事の本文を、重要度が高い順に必ず3行の箇条書き（改行区切り）で要約してください。余計な挨拶や解説、箇条書きの記号（・や-*など）は一切含めず、純粋なテキストの3行のデータだけを返してください。"
+                },
+                {
+                    role: "user",
+                    content: `タイトル: ${articleTitle}\n\n本文\n${articleText}`,
+                }
+            ],
+            temperature: 0.3,
+        });
 
-
+        const summaryContent = completion.choices[0].message.content;
 
 
 
