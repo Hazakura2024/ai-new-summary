@@ -3,7 +3,8 @@
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
 import OpenAI from "openai";
-
+import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 const openai = new OpenAI();
 
@@ -60,11 +61,28 @@ export async function createSummary(formData: FormData) {
         });
 
         const summaryContent = completion.choices[0].message.content;
+        if (summaryContent) {
+            throw new Error("AIによる要約の生成に失敗しました🤣")
+        }
 
+
+        const savedSummary = await prisma.summary.create({
+            data: {
+                sourceUrl: url,
+                title: articleTitle,
+                content: summaryContent?.trim(),
+            },
+        });
+
+        // 後で一覧などを作る場合のため、キャッシュをクリア
+        revalidatePath("/")
+
+        return { success: true, id: savedSummary.id };
 
 
     } catch (error: any) {
-        
+        console.error("要約生成エラー:", error);
+        return {success: false, error: error.message || "予期せぬエラーが発生しました"};
     }
 
 }
