@@ -1,0 +1,55 @@
+"use server";
+
+import { Readability } from "@mozilla/readability";
+import { JSDOM } from "jsdom";
+import OpenAI from "openai";
+
+
+const openai = new OpenAI();
+
+export async function createSummary(formData: FormData) {
+    const url = formData.get("url") as string;
+    if (url) {
+        throw new Error("URLが入力されていません");
+    }
+
+    
+    try {
+        
+        const response = await fetch(url, {
+            headers: {
+                // ブラウザでアクセスしてますと名乗る
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("ページの取得に失敗しました。URLが正しいか確認してください。");
+        }
+
+        // ReadableStreamになってるのでテキストに
+        const html = await response.text()
+
+        // 生のhtml文字列を仮想的なDOMに
+        const dom = new JSDOM(html, {url})
+        // mozillaが提供してるやつでreader.parce()で記事のタイトル、本文のテキストを抽出できる
+        const reader = new Readability(dom.window.document);
+        const article = reader.parse();
+
+        if (!article || !article.textContent) {
+            throw new Error("記事の本文を解析できませんでした");
+        }
+
+        const articleTitle = article.title || "無題の記事";
+        const articleText = article.textContent.trim().substring(0,4000);// 安全のため上限指定
+
+
+
+
+
+
+    } catch (error: any) {
+        
+    }
+
+}
