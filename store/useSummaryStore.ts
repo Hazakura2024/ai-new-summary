@@ -8,7 +8,8 @@ interface SummaryState {
     articleTitle: string | null,
     sourceUrl: string,
     setSourceUrl: (url: string) => void;
-    generateSummary: (formData: FormData) => Promise<void>;
+    // 🌟 戻り値を Promise<string | undefined> に変更（成功時にIDを返すため）
+    generateSummary: (formData: FormData) => Promise<string | undefined>;
     reset: () => void;
 }
 
@@ -28,14 +29,16 @@ export const useSummaryStore = create<SummaryState>((set) => ({
             const result = await createSummary(formData);
 
             if (result.success) {
+                // 🌟 成功時はローディングを解除し、生成されたIDを返す
+                set({ isLoading: false });
+                return result.id;
+            } else {
+                // 🌟 失敗時（else）の処理を追加
                 set({ isLoading: false, error: result.error || "要約の生成に失敗しました。" });
             }
         } catch (error) {
             set({ isLoading: false, error: "通信エラーが発生しました" });
         }
-
-
-        
     },
     reset: () => set({ isLoading:false, error:null, summaryLines: null, articleTitle: null, sourceUrl: ""}),
 }))

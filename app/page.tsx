@@ -1,9 +1,43 @@
+'use client';
+
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSummaryStore } from "@/store/useSummaryStore";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation"; // 🌟 画面遷移用のルーターをインポート
 
 export default function Home() {
+  const router = useRouter(); // 🌟 ルーターを初期化
+
+  const {
+    sourceUrl,
+    setSourceUrl,
+    isLoading,
+    error,
+    generateSummary,
+    reset,
+  } = useSummaryStore();
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    
+    // 🌟 もしURLが「ない」なら何もしない（以前のコードは sourceUrl だけで判定していました）
+    if (!sourceUrl) return;
+
+    const formData = new FormData(event.currentTarget);
+    
+    // 🌟 generateSummary を実行し、成功したら id を受け取る
+    const generatedId = await generateSummary(formData);
+
+    // id が無事に返ってきたら、個別ページへリダイレクト！
+    if (generatedId) {
+      setSourceUrl(""); // 念のため入力欄をクリア
+      router.push(`/summary/${generatedId}`);
+    }
+  }
+
   return (
     <>
     <header className="fixed top-0 z-50 w-full border-b border-slate-200/50 bg-white/60 shadow-lg backdrop-blur-sm p-2">
@@ -19,24 +53,41 @@ export default function Home() {
           <p>ネットニュースの記事のURLを入力すると、AIが3文で記事の要約を生成します。</p>
         </div>
 
-        <form className="flex flex-col gap-4">
-          <Input className="bg-white" placeholder="URLを入力..."/>
-          <Button className="font-bold">要約を生成</Button>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* 🌟 フォームのデータを正確に飛ばすために name, value, onChange を追加！ */}
+          <Input 
+            className="bg-white" 
+            placeholder="URLを入力..."
+            name="url"
+            value={sourceUrl}
+            onChange={(e) => setSourceUrl(e.target.value)}
+            disabled={isLoading}
+            required
+          />
+          <Button className="font-bold" type="submit" disabled={isLoading || !sourceUrl}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                AIが記事を読み込み中...
+              </>
+            ) : (
+              "要約を生成する"
+            )}
+          </Button>
         </form>
 
-        <Card className="mt-8 border-2 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">要約結果</CardTitle>
-            <CardDescription>タイトル</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>1行</li>
-              <li>2行</li>
-              <li>3行</li>
-            </ul>
-          </CardContent>
-        </Card>
+        {/* エラー表示エリア */}
+        {error && (
+          <div className="flex items-center gap-2 p-4 text-sm text-red-700 bg-red-50 rounded-lg border border-red-200">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* 🌟 今後は要約が完了したら別のページに飛ぶので、
+          ここの「要約結果」のCardはトップページには不要になりますが、
+          一旦残しておいても大丈夫です！
+        */}
 
       </div>
     </main>
