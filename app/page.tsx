@@ -40,11 +40,6 @@ export default function Home() {
 
   return (
     <>
-    <header className="fixed top-0 z-50 w-full border-b border-slate-200/50 bg-white/60 shadow-lg backdrop-blur-sm p-2">
-      <a>
-        <h1 className="text-xl font-bold">AI-news-summary</h1>
-      </a>
-    </header>
     <main className="flex min-h-screen flex-col items-center p-6 pt-24 bg-[url('/bg-yokohama.jpg')] bg-cover bg-center bg-fixed">
       <div className="w-full max-w-md space-y-8 bg-white/60 p-8 rounded-xl shadow-lg backdrop-blur-sm">
 
