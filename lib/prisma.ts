@@ -1,17 +1,27 @@
-import { PrismaClient } from "@prisma/client/extension"
+import { PrismaClient } from '@prisma/client'
+import { Pool } from 'pg'
+import { PrismaPg } from '@prisma/adapter-pg'
 
+// Prisma 7.8.0 用の最新の初期化処理
 const prismaClientSingleton = () => {
-     return new PrismaClient({
-        datasources: {
-            db: {
-                url: process.env.DATABASE_URL,
-            },
-        },
-     })
+  const connectionString = process.env.DATABASE_URL
+  
+  if (!connectionString) {
+    throw new Error("環境変数 DATABASE_URL が設定されていません。")
+  }
+
+  // pgモジュールのコネクションプールを作成
+  const pool = new Pool({ connectionString })
+  
+  // Prismaにpgアダプターをセットアップ
+  const adapter = new PrismaPg(pool)
+  
+  // 🌟 アダプターを渡してPrismaClientを初期化（これが必須になりました）
+  return new PrismaClient({ adapter })
 }
 
 declare const globalThis: {
-    prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
 } & typeof global;
 
 const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
