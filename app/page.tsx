@@ -1,9 +1,7 @@
 'use client';
 
-import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSummaryStore } from "@/store/useSummaryStore";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation"; // 🌟 画面遷移用のルーターをインポート
@@ -17,7 +15,6 @@ export default function Home() {
     isLoading,
     error,
     generateSummary,
-    reset,
   } = useSummaryStore();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
