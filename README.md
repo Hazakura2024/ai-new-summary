@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI News Summary
 
-## Getting Started
+ネットニュース記事のURLを入力すると、本文を抽出してAI(chatGPT)が自動で3行に要約するWebアプリケーションです。
 
-First, run the development server:
+![動作例](./images/preview.gif)
+
+## 主な機能
+
+- **記事の自動抽出**: URLからニュース記事のタイトルと本文をスクレイピング（Mozilla Readabilityを使用）
+- **AI要約**: OpenAI API (gpt-4o-mini) を活用し、重要度順に3行の箇条書きで要約
+- **要約の保存・共有**: 生成された要約結果はデータベースに保存され、履歴からの一覧も可能。
+
+## 技術スタック
+
+- **フレームワーク**: Next.js (App Router)
+- **スタイリング**: Tailwind CSS / shadcn/ui
+- **データベース**: Supabase (PostgreSQL)
+- **ORM**: Prisma (v7)
+- **AI**: OpenAI API
+- **状態管理**: Zustand
+
+## ローカル環境の構築
+
+### 1. リポジトリのクローンとパッケージのインストール
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd <project-directory>
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 環境変数の設定
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+プロジェクトのルートディレクトリに .env ファイルを作成し、以下の内容を設定してください。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
 
-## Learn More
+# Supabase (Transaction connection pooler)
 
-To learn more about Next.js, take a look at the following resources:
+DATABASE_URL="postgresql://postgres.[YOUR-PROJECT-ID]:[PASSWORD]@...:6543/postgres?pgbouncer=true&connection_limit=1"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Supabase (Session connection pooler for Prisma Migrations)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+DIRECT_URL="postgresql://postgres.[YOUR-PROJECT-ID]:[PASSWORD]@...:5432/postgres"
 
-## Deploy on Vercel
+# OpenAI API Key
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+OPENAI_API_KEY="sk-..."
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+
+### 3. データベースのセットアップ
+
+Prismaを使用してデータベースのテーブルを作成・同期します。
+
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+### 4. 開発サーバーの起動
+
+```Bash
+npm run dev
+```
+
+ブラウザで http://localhost:3000 にアクセスして動作を確認。
