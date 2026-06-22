@@ -1,7 +1,6 @@
 "use server";
 
-import { Readability } from "@mozilla/readability";
-import { JSDOM } from "jsdom";
+import * as cheerio from "cheerio";
 import OpenAI from "openai";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -32,18 +31,20 @@ export async function createSummary(formData: FormData) {
     // ReadableStreamになってるのでテキストに
     const html = await response.text();
 
-    // 生のhtml文字列を仮想的なDOMに
-    const dom = new JSDOM(html, { url });
-    // mozillaが提供してるやつでreader.parce()で記事のタイトル、本文のテキストを抽出できる
-    const reader = new Readability(dom.window.document);
-    const article = reader.parse();
+    // jQueryの慣習で$に
+    const $ = cheerio.load(html);
 
-    if (!article || !article.textContent) {
+    const articleTitle = $("title").text() || "無題の記事";
+
+    $("script, style, noscript, iframe, nav, footer, header, aside").remove();
+
+    const rawText = $("body").text().replace(/\s+/g, " ").trim();
+
+    if (!rawText) {
       throw new Error("記事の本文を解析できませんでした");
     }
 
-    const articleTitle = article.title || "無題の記事";
-    const articleText = article.textContent.trim().substring(0, 4000); // 安全のため上限指定
+    const articleText = rawText.substring(0, 4000); // 安全のため上限指定
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
