@@ -37,7 +37,7 @@ export default async function SummaryPage({ params }: Props) {
 
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center p-6 pt-24 bg-[url('/bg-yokohama.jpg')] bg-cover bg-center bg-fixed">
+      <main className="flex min-h-screen flex-col items-center p-6 pt-24 ">
         <div className="flex flex-col items-center   w-full max-w-md space-y-8 bg-white/60 p-8 rounded-xl shadow-lg backdrop-blur-sm">
           <div className="w-full max-w-md space-y-8">
             <h1 className="text-3xl font-bold ">記事の要約を生成</h1>
